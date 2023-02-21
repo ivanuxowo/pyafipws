@@ -313,6 +313,7 @@ class WSCPE(BaseWS):
                 'tipo': domicilio_origen_tipo, 
                 'orden': domicilio_origen_orden,
             }
+        }
         self.cpe["origen"] = origen
         return True
 
@@ -371,11 +372,11 @@ class WSCPE(BaseWS):
             'lote': lote, 
             'fechaLote': fecha_lote,
         }
-        if not datos_carga["cosecha"]:
-            self.cpe["pesoBrutoDescarga"] = peso_bruto
-            self.cpe["pesoTaraDescarga"] = peso_tara
-        else:
-            self.cpe["datosCarga"] = datos_carga
+        #if not datos_carga["cosecha"]:
+        #    self.cpe["pesoBrutoDescarga"] = peso_bruto
+        #    self.cpe["pesoTaraDescarga"] = peso_tara
+        #else:
+        self.cpe["datosCarga"] = datos_carga
         return True
 
     @inicializar_y_capturar_excepciones
@@ -394,7 +395,7 @@ class WSCPE(BaseWS):
             'domicilioDestino':{
                 'tipo': domicilio_destino_tipo, 
                 'orden': domicilio_destino_orden,
-            }
+            },
             "planta": planta,
         }
         destinatario = {"cuit": cuit_destinatario}
@@ -453,18 +454,20 @@ class WSCPE(BaseWS):
             'cuitTransportista': cuit_transportista, 
             'fechaHoraPartida': fecha_hora_partida, 
             'kmRecorrer': km_recorrer, 
-            'cuitChofer': cuit_chofernt, 
+            'cuitChofer': cuit_chofer, 
             'tarifa': tarifa, 
             'cuitPagadorFlete': cuit_pagador_flete, 
             'cuitIntermediarioFlete': cuit_intermediario_flete,
+            "dominio": [],
             }
         # ajuste para confirmacion_definitiva_cpe_ferroviaria
-        if "transporte" in self.cpe and dominio:
-            self.AgregarDominio(dominio)
-        elif transporte["kmRecorrer"]:
+ 
+        if transporte["kmRecorrer"]:
             self.cpe["transporte"] = transporte
         else:
             self.cpe.update(transporte)
+        if "transporte" in self.cpe and dominio:
+            self.AgregarDominio(dominio)
         return True
 
     @inicializar_y_capturar_excepciones
@@ -1229,8 +1232,8 @@ if __name__ == "__main__":
 
     if "--help" in sys.argv:
         print(wscpe.client.help("autorizarCPEAutomotorDG"))
+        sys.exit(0)
 
-    sys.exit(0)
     wscpe.SetTicketAcceso(ta)
     wscpe.Cuit = CUIT
     ok = None
@@ -1251,56 +1254,117 @@ if __name__ == "__main__":
             cuit_solicitante=CUIT,
             sucursal=221,
             nro_orden=nro_orden,
-            observaciones="Notas del transporte"
+            planta=None,
+            carta_porte=None,
+            nro_ctg=None,
+            observaciones="Notas del transporte",
+            
+            #tipo_cpe=74,
+            #cuit_solicitante=CUIT,
+            #sucursal=221,
+            #nro_orden=nro_orden,
+            #observaciones="Notas del transporte"
         )
         ok = wscpe.AgregarOrigen(
-            # planta=1,
-            # cod_provincia_operador=12,
-            # cod_localidad_operador=7717,
-            cod_provincia_productor=1,
-            cod_localidad_productor=14310
+            es_usuario_industrial=None,
+            cuit_titular_planta=None,
+            domicilio_origen_tipo=None,
+            domicilio_origen_orden=None,
+            planta=1,
+            
+            #planta=1,
+            #cod_provincia_operador=12,
+            #cod_localidad_operador=7717,
+            #cod_provincia_productor=1,
+            #cod_localidad_productor=14310
         )
         ok = wscpe.AgregarDestino(
-            planta=1938,
-            cod_provincia=12,
-            es_destino_campo=True,
-            cod_localidad=14310,
             cuit_destino=CUIT,
+            domicilio_destino_tipo=None,
+            domicilio_destino_orden=None,
+            planta=1938,
             cuit_destinatario=CUIT,
+
+            #planta=1938,
+            #cod_provincia=12,
+            #es_destino_campo=True,
+            #cod_localidad=14310,
+            #cuit_destino=CUIT,
+            #cuit_destinatario=CUIT,
         )
         ok = wscpe.AgregarRetiroProductor(
+            corresponde_retiro_productor=False,
+            es_solicitante_campo=True, # chequear dice booleano
+            certificado_coe=330100025869,
+            cuit_remitente_comercial_productor=20111111112,
+
             # certificado_coe=330100025869,
             # cuit_remitente_comercial_productor=20111111112,
-            corresponde_retiro_productor=False,  # chequear dice booleano
-            es_solicitante_campo=True,  # chequear dice booleano
+            #corresponde_retiro_productor=False,  # chequear dice booleano
+            #es_solicitante_campo=True,  # chequear dice booleano
         )
         ok = wscpe.AgregarIntervinientes(
+            cuit_reminitente_comercial=None,
+            cuit_mercado_a_termino=20222222223,
+            cuit_comisionista=None,
+            cuit_corredor=None,
+
             # cuit_mercado_a_termino=20222222223,
             # cuit_corredor_venta_primaria=20200000006,
             # cuit_corredor_venta_secundaria=20222222223,
             # cuit_remitente_comercial_venta_secundaria=20222222223,
-            cuit_remitente_comercial_venta_secundaria2=20400000000,
-            cuit_remitente_comercial_venta_primaria=27000000014,
+            #cuit_remitente_comercial_venta_secundaria2=20400000000,
+            #cuit_remitente_comercial_venta_primaria=27000000014,
             # cuit_representante_entregador=20222222223,
             # cuit_representante_recibidor=20222222223
         )
         ok = wscpe.AgregarDatosCarga(
-            peso_tara=10,
-            cod_grano=23,
-            peso_bruto=110,
-            cosecha=2021,
+            cod_grano=23, 
+            cod_derivado_granario=None, 
+            peso_bruto=110, 
+            peso_tara=10, 
+            tipo_embalaje=None, 
+            otro_embalaje=None, 
+            unidad_media=None, 
+            cantidad_unidades=None,
+            kg_litro_m3=None, 
+            lote=None, 
+            fecha_lote=None,
+            
+            #peso_tara=10,
+            #cod_grano=23,
+            #peso_bruto=110,
+            #cosecha=2021,
         )
         ok = wscpe.AgregarTransporte(
             cuit_transportista=20120372913,
-            fecha_hora_partida=datetime.datetime.now() + datetime.timedelta(days=1),
-            # codigo_turno="00",
+            cuit_transportista_tramo2=None,
+            nro_vagon=None,
+            nro_precinto=None,
+            nro_operativo=None,
             dominio="AB001ST",  # 1 or more repetitions
+            fecha_hora_partida=datetime.datetime.now() + datetime.timedelta(days=1),
             km_recorrer=500,
+            codigo_turno=None,
             cuit_chofer=20333333334,
+            tarifa=100.10,
+            cuit_pagador_flete=20333333334,
+            mercaderia_fumigada=True,
+            cuit_intermediario_flete=20333333334,
+            codigo_ramal=None,
+            descripcion_ramal=None,
+            tarifa_referencia=None,
+            
+            #cuit_transportista=20120372913,
+            #fecha_hora_partida=datetime.datetime.now() + datetime.timedelta(days=1),
+            # codigo_turno="00",
+            #dominio="AB001ST",  # 1 or more repetitions
+            #km_recorrer=500,
+            #cuit_chofer=20333333334,
             # tarifa=100.10,
             # cuit_pagador_flete=20333333334,
             # cuit_intermediario_flete=20333333334,
-            mercaderia_fumigada=True,
+            #mercaderia_fumigada=True,
         )
         ok = wscpe.AgregarTransporte(dominio="AD000UV")
         ok = wscpe.AgregarDominio("AC000TU")
