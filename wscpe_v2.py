@@ -143,7 +143,7 @@ class WSCPE(BaseWS):
         "ConfirmacionDefinitivaCPEFerroviaria",
         "CerrarContingenciaCPE",
         "ConsultarUltNroOrden",
-        "ConsultarCPEAutomotor",
+        "ConsultarCPEAutomotorDG",
         "ConsultarCPEPorDestino",
         "ConsultarCPEPendientesDeResolucion",
         "NuevoDestinoDestinatarioCPEAutomotor",
@@ -905,8 +905,9 @@ class WSCPE(BaseWS):
         return True
 
     @inicializar_y_capturar_excepciones
-    def ConsultarCPEAutomotor(
-        self, tipo_cpe=None, cuit_solicitante=None, sucursal=None, nro_orden=None, nro_ctg=None, archivo="cpe.pdf"
+    def ConsultarCPEAutomotorDG(
+        self, tipo_cpe=None, cuit_solicitante=None, sucursal=None, nro_orden=None, nro_ctg=None, archivo="cpe.pdf",
+        cuit_titular_planta=None,
     ):
         """Busca una CPE existente según parámetros de búsqueda y retorna información de la misma."""
         if not nro_ctg:
@@ -922,7 +923,8 @@ class WSCPE(BaseWS):
                 "nroCTG": nro_ctg,
             }
         solicitud["cuitSolicitante"] = cuit_solicitante
-        response = self.client.consultarCPEAutomotor(
+        solicitud["cuitTitularPlanta"] = cuit_titular_planta
+        response = self.client.consultarCPEAutomotorDG(
             auth={
                 "token": self.Token,
                 "sign": self.Sign,
@@ -1654,8 +1656,8 @@ if __name__ == "__main__":
             dominio=["AA001ST"],
         )
 
-    if "--consultar_cpe_automotor" in sys.argv:
-        wscpe.ConsultarCPEAutomotor(tipo_cpe=74, sucursal=1, nro_orden=1, cuit_solicitante=CUIT)
+    if "--consultar_cpe_automotor_dg" in sys.argv:
+        wscpe.ConsultarCPEAutomotorDG(tipo_cpe=74, sucursal=1, nro_orden=1, cuit_solicitante=CUIT)
 
     if "--confirmacion_definitiva_cpe_automotor" in sys.argv:
         wscpe.AgregarCabecera(cuit_solicitante=CUIT, tipo_cpe=74, sucursal=1, nro_orden=1)
