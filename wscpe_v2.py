@@ -167,6 +167,8 @@ class WSCPE(BaseWS):
         "DesvioCPEAutomotorDG",
         "NuevoDestinoDestinatarioCPEAutomotorDG",
         "RegresoOrigenCPEAutomotorDG",
+        #"EditarCPEConfirmadaAutomotor",
+        "ConsultarCPEDGPendienteActivacion",
         #"ConsultarDomiciliosPorCUIT",
 
         "SetParametros",
@@ -1200,6 +1202,40 @@ class WSCPE(BaseWS):
                 ("%s {nroCTG} %s {fechaPartida} %s {estado} %s {fechaUltimaModificacion} %s" % (sep, sep, sep, sep, sep)).format(**it)
                 if sep else it for it in array
             ]
+    
+    @inicializar_y_capturar_excepciones
+    def ConsultarCPEDGPendienteActivacion(self, planta=None, sep="||"):
+        """consulta de CPE que se encuentran pendientes de activación."""
+        solicitud = {
+            "planta": planta
+        }
+        response = self.client.consultarCPEDGPendienteActivacion(
+            auth={
+                "token": self.Token,
+                "sign": self.Sign,
+                "cuitRepresentada": self.Cuit,
+            },
+            solicitud=solicitud
+        )
+        ret = response.get("respuesta")
+        self.__analizar_errores(ret)
+        if "cartaPorte" in ret:
+            # agrego titulos para respuesta
+            array = [
+                {
+                    "tipoCartaPorte": "Tipo de Carta Porte",
+                    "sucursal": "Sucursal",
+                    "nroOrden": "Número de orden",
+                    "cuitSolicitante": "Cuit Solicitante",
+                    "fechaPartida": "Fecha de Partida",
+                }
+            ]
+            array.extend(ret.get("cartaPorte", []))
+            return [
+                ("%s {tipoCartaPorte} %s {sucursal} %s {nroOrden} %s {cuitSolicitante} %s {fechaPartida} %s" % (sep, sep, sep, sep, sep, sep)).format(**it)
+                if sep else it for it in array
+            ]
+
 
     @inicializar_y_capturar_excepciones
     def ConsultarUltNroOrden(self, sucursal=None, tipo_cpe=None):
@@ -1876,6 +1912,14 @@ if __name__ == "__main__":
         ret = wscpe.ConsultarCPEPendientesDeResolucion(
             perfil="S",  # S: Solicitante, D: Destino
             # planta=1938,
+        )
+        if ret:
+            print("\n".join(ret))
+
+    if "--consultar_cpedg_pendiente_activacion" in sys.argv:
+        ret = wscpe.ConsultarCPEDGPendienteActivacion(
+            planta=1938,  
+            # S: Solicitante, D: Destino  
         )
         if ret:
             print("\n".join(ret))
