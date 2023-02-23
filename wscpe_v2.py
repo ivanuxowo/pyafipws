@@ -251,6 +251,9 @@ class WSCPE(BaseWS):
         self._actualizar = actualiza
         self.cpe = {}
         return True
+    
+    def ActualizarCPE(self):
+        return self.CrearCPE(actualiza=True)
 
     @inicializar_y_capturar_excepciones
     def AgregarCabecera(
@@ -580,6 +583,24 @@ class WSCPE(BaseWS):
             cpe_bytes = cpe_bytes.encode("utf-8")
         with open(archivo, "wb") as fh:
             fh.write(cpe_bytes)
+
+    @inicializar_y_capturar_excepciones
+    def AceptarEmisionDG(self, archivo="cpe.pdf"):
+        """Informar los datos necesarios para la generación de una nueva carta porte."""
+        response = self.client.anularCPE(
+            auth={
+                "token": self.Token,
+                "sign": self.Sign,
+                "cuitRepresentada": self.Cuit,
+            },
+            solicitud=self.cpe,
+        )
+        ret = response.get("respuesta")
+        if ret:
+            self.__analizar_errores(ret)
+        if "cabecera" in ret:
+            self.AnalizarCPE(ret, archivo)
+        return True
 
     @inicializar_y_capturar_excepciones
     def AnularCPE(self, archivo="cpe.pdf"):
@@ -1488,6 +1509,11 @@ if __name__ == "__main__":
     if "--anular_cpe" in sys.argv:
         wscpe.AgregarCabecera(tipo_cpe=74, sucursal=211, nro_orden=1)
         wscpe.AnularCPE()
+
+    if "--aceptar_emision_dg" in sys.argv:
+        wscpe.ActualizarCPE()
+        wscpe.AgregarCabecera(tipo_cpe=74, sucursal=211, nro_orden=1)
+        wscpe.AceptarEmisionDG()
 
     if "--rechazo_cpe" in sys.argv:
         wscpe.AgregarCabecera(cuit_solicitante=CUIT, tipo_cpe=74, sucursal=1, nro_orden=1)
