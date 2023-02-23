@@ -160,6 +160,7 @@ class WSCPE(BaseWS):
         "EditarCPEAutomotor",
         "EditarCPEFerroviaria",
         "ConsultarPlantas",
+        "ConsultarDerivadosGranarios",
         "SetParametros",
         "SetParametro",
         "GetParametro",
@@ -1188,6 +1189,36 @@ class WSCPE(BaseWS):
             ]
 
     @inicializar_y_capturar_excepciones
+    def ConsultarDerivadosGranarios(self, cuit, sep="||"):
+        """Permite la consulta de plantas activas"""
+        response = self.client.consultarDerivadosGranarios(
+            auth={
+                "token": self.Token,
+                "sign": self.Sign,
+                "cuitRepresentada": self.Cuit,
+            },
+            solicitud={"cuit": cuit},
+        )
+        ret = response.get("respuesta")
+        self.__analizar_errores(ret)
+        if "derivadoGranario" in ret:
+            # agrego titulos para respuesta
+            array = [
+                {
+                    "granoPadre": "Grano Padre",
+                    "granoPadreDescripcion": "Grano Padre Descripcion",
+                    "codigo": "Codigo",
+                    "descripcion": "Descripcion"
+                }
+            ]
+            array.extend(ret.get("derivadoGranario", []))
+            return [
+                ("%s {granoPadre} %s {granoPadreDescripcion} %s {codigo} %s {descripcion} %s" % (sep, sep, sep, sep, sep)).format(**it)
+                if sep else it for it in array
+            ]
+
+
+    @inicializar_y_capturar_excepciones
     def Dummy(self):
         """Obtener el estado de los servidores de la AFIP."""
         results = self.client.dummy()["respuesta"]
@@ -1231,7 +1262,7 @@ if __name__ == "__main__":
     wscpe.Conectar(wsdl=wscpe_url)
 
     if "--help" in sys.argv:
-        print(wscpe.client.help("autorizarCPEAutomotorDG"))
+        print(wscpe.client.help("consultarUnidadesMedida"))
         sys.exit(0)
 
     wscpe.SetTicketAcceso(ta)
@@ -1690,6 +1721,11 @@ if __name__ == "__main__":
 
     if "--plantas" in sys.argv:
         ret = wscpe.ConsultarPlantas(cuit=CUIT)
+        if ret:
+            print("\n".join(ret))
+
+    if "--derivados_granarios" in sys.argv:
+        ret = wscpe.ConsultarDerivadosGranarios(cuit=CUIT)
         if ret:
             print("\n".join(ret))
 
