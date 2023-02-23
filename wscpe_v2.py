@@ -161,6 +161,11 @@ class WSCPE(BaseWS):
         "EditarCPEFerroviaria",
         "ConsultarPlantas",
         "ConsultarDerivadosGranarios",
+        "AceptarEmisionDG",
+        "RechazarEmisionDG",
+        "ConfirmacionDefinitivaCPEAutomotorDG",
+        "DesvioCPEAutomotorDG",
+
         "SetParametros",
         "SetParametro",
         "GetParametro",
@@ -376,11 +381,11 @@ class WSCPE(BaseWS):
             'lote': lote, 
             'fechaLote': fecha_lote,
         }
-        #if not datos_carga["cosecha"]:
-        #    self.cpe["pesoBrutoDescarga"] = peso_bruto
-        #    self.cpe["pesoTaraDescarga"] = peso_tara
-        #else:
-        self.cpe["datosCarga"] = datos_carga
+        if not cod_grano:
+            self.cpe["pesoBrutoDescarga"] = peso_bruto
+            self.cpe["pesoTaraDescarga"] = peso_tara
+        else:
+            self.cpe["datosCarga"] = datos_carga
         return True
 
     @inicializar_y_capturar_excepciones
@@ -586,6 +591,24 @@ class WSCPE(BaseWS):
 
     @inicializar_y_capturar_excepciones
     def AceptarEmisionDG(self, archivo="cpe.pdf"):
+        """Informar los datos necesarios para la generación de una nueva carta porte."""
+        response = self.client.anularCPE(
+            auth={
+                "token": self.Token,
+                "sign": self.Sign,
+                "cuitRepresentada": self.Cuit,
+            },
+            solicitud=self.cpe,
+        )
+        ret = response.get("respuesta")
+        if ret:
+            self.__analizar_errores(ret)
+        if "cabecera" in ret:
+            self.AnalizarCPE(ret, archivo)
+        return True
+
+    @inicializar_y_capturar_excepciones
+    def RechazarEmisionDG(self, archivo="cpe.pdf"):
         """Informar los datos necesarios para la generación de una nueva carta porte."""
         response = self.client.anularCPE(
             auth={
@@ -977,6 +1000,25 @@ class WSCPE(BaseWS):
         if "cabecera" in ret:
             self.AnalizarCPE(ret, archivo)
         return True
+    
+    @inicializar_y_capturar_excepciones
+    def ConfirmacionDefinitivaCPEAutomotorDG(self, archivo="cpe.pdf"):
+        """Informar la confirmación definitiva de una carta de porte existente."""
+        response = self.client.confirmacionDefinitivaCPEAutomotorDG(
+            auth={
+                "token": self.Token,
+                "sign": self.Sign,
+                "cuitRepresentada": self.Cuit,
+            },
+            solicitud=self.cpe,
+        )
+        ret = response.get("respuesta")
+        if ret:
+            self.__analizar_errores(ret)
+        if "cabecera" in ret:
+            self.AnalizarCPE(ret, archivo)
+        return True
+
 
     @inicializar_y_capturar_excepciones
     def NuevoDestinoDestinatarioCPEAutomotor(self, archivo="cpe.pdf"):
@@ -1016,6 +1058,23 @@ class WSCPE(BaseWS):
     def DesvioCPEAutomotor(self, archivo="cpe.pdf"):
         """Informar el desvío de una carta de porte existente."""
         response = self.client.desvioCPEAutomotor(
+            auth={
+                "token": self.Token,
+                "sign": self.Sign,
+                "cuitRepresentada": self.Cuit,
+            },
+            solicitud=self.cpe,
+        )
+        ret = response.get("respuesta")
+        self.__analizar_errores(ret)
+        if "cabecera" in ret:
+            self.AnalizarCPE(ret, archivo)
+        return True
+    
+    @inicializar_y_capturar_excepciones
+    def DesvioCPEAutomotorDG(self, archivo="cpe.pdf"):
+        """Informar el desvío de una carta de porte existente."""
+        response = self.client.desvioCPEAutomotorDG(
             auth={
                 "token": self.Token,
                 "sign": self.Sign,
@@ -1515,6 +1574,11 @@ if __name__ == "__main__":
         wscpe.AgregarCabecera(tipo_cpe=74, sucursal=211, nro_orden=1)
         wscpe.AceptarEmisionDG()
 
+    if "--rechazar_emision_dg" in sys.argv:
+        wscpe.ActualizarCPE()
+        wscpe.AgregarCabecera(tipo_cpe=74, sucursal=211, nro_orden=1)
+        wscpe.RechazarEmisionDG()
+
     if "--rechazo_cpe" in sys.argv:
         wscpe.AgregarCabecera(cuit_solicitante=CUIT, tipo_cpe=74, sucursal=1, nro_orden=1)
         wscpe.RechazoCPE()
@@ -1579,7 +1643,7 @@ if __name__ == "__main__":
         #     cuit_remitente_comercial_venta_secundaria2=20222222223,
         #     cuit_representante_recibidor=20222222223,  # nuevo
         # )
-        wscpe.AgregarDatosCarga(peso_bruto=1000, peso_tara=10000)
+        wscpe.AgregarDatosCarga(peso_bruto=10000, peso_tara=1000)
         wscpe.AgregarTransporte(
             codigo_ramal=99,
             descripcion_ramal="XXXXX",
@@ -1688,8 +1752,16 @@ if __name__ == "__main__":
     if "--confirmacion_definitiva_cpe_automotor" in sys.argv:
         wscpe.AgregarCabecera(cuit_solicitante=CUIT, tipo_cpe=74, sucursal=1, nro_orden=1)
         # wscpe.AgregarIntervinientes(cuit_representante_recibidor=20222222223)
-        wscpe.AgregarDatosCarga(peso_bruto=1000, peso_tara=10000)
+        wscpe.AgregarDatosCarga(peso_bruto=10000, peso_tara=1000)
         wscpe.ConfirmacionDefinitivaCPEAutomotor()
+
+    if "--confirmacion_definitiva_cpe_automotor_dg" in sys.argv:
+        wscpe.ActualizarCPE()
+        wscpe.AgregarCabecera(cuit_solicitante=CUIT, tipo_cpe=74, sucursal=1, nro_orden=1)
+        # wscpe.AgregarIntervinientes(cuit_representante_recibidor=20222222223)
+        wscpe.AgregarDatosCarga(peso_bruto=10000, peso_tara=1000)
+        wscpe.ConfirmacionDefinitivaCPEAutomotorDG()
+
 
     if "--nuevo_destino_destinatario_cpe_automotor" in sys.argv:
         wscpe.AgregarCabecera(tipo_cpe=74, sucursal=1, nro_orden=1)
