@@ -167,9 +167,10 @@ class WSCPE(BaseWS):
         "DesvioCPEAutomotorDG",
         "NuevoDestinoDestinatarioCPEAutomotorDG",
         "RegresoOrigenCPEAutomotorDG",
-        #"EditarCPEConfirmadaAutomotor",
+        "EditarCPEConfirmadaAutomotor",
         "ConsultarCPEDGPendienteActivacion",
         #"ConsultarDomiciliosPorCUIT",
+        "ConsultarTiposEmbalaje",
 
         "SetParametros",
         "SetParametro",
@@ -1318,6 +1319,21 @@ class WSCPE(BaseWS):
         return [(u"%s {codigo} %s {descripcion} %s" % (sep, sep, sep)).format(**it) if sep else it for it in array]
 
     @inicializar_y_capturar_excepciones
+    def ConsultarTiposEmbalaje(self, sep="||"):
+        """Obtener los códigos numéricos de los tipos de embalajes."""
+        response = self.client.consultarTiposEmbalaje(
+            auth={
+                "token": self.Token,
+                "sign": self.Sign,
+                "cuitRepresentada": self.Cuit,
+            },
+        )
+        ret = response.get("respuesta")
+        self.__analizar_errores(ret)
+        array = ret.get("tipoEmbalaje", [])
+        return [(u"%s {codigo} %s {descripcion} %s {unidadMedida} %s" % (sep, sep, sep, sep)).format(**it) if sep else it for it in array]
+
+    @inicializar_y_capturar_excepciones
     def ConsultarLocalidadesProductor(self, cuit_productor=None, sep="||"):
         """Obtener de localidades del cuit asociado al productor."""
         response = self.client.consultarLocalidadesProductor(
@@ -1934,6 +1950,10 @@ if __name__ == "__main__":
 
     if "--tipos_grano" in sys.argv:
         ret = wscpe.ConsultarTiposGrano()
+        print("\n".join(ret))
+
+    if "--tipos_grano_embalaje" in sys.argv:
+        ret = wscpe.ConsultarTiposEmbalaje()
         print("\n".join(ret))
 
     if "--localidades_productor" in sys.argv:
