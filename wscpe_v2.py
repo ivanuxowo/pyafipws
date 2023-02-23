@@ -165,7 +165,9 @@ class WSCPE(BaseWS):
         "RechazarEmisionDG",
         "ConfirmacionDefinitivaCPEAutomotorDG",
         "DesvioCPEAutomotorDG",
-        "NuevoDestinoDestinatarioCPEAutomotorDG"
+        "NuevoDestinoDestinatarioCPEAutomotorDG",
+        "RegresoOrigenCPEAutomotorDG",
+        #"ConsultarDomiciliosPorCUIT",
 
         "SetParametros",
         "SetParametro",
@@ -1071,6 +1073,24 @@ class WSCPE(BaseWS):
         if "cabecera" in ret:
             self.AnalizarCPE(ret, archivo)
         return True
+    
+    @inicializar_y_capturar_excepciones
+    def RegresoOrigenCPEAutomotorDG(self, archivo="cpe.pdf"):
+        """Informar el regreso a origen de una carta de porte existente."""
+        response = self.client.regresoOrigenCPEAutomotorDG(
+            auth={
+                "token": self.Token,
+                "sign": self.Sign,
+                "cuitRepresentada": self.Cuit,
+            },
+            solicitud=self.cpe,
+        )
+        ret = response.get("respuesta")
+        self.__analizar_errores(ret)
+        if "cabecera" in ret:
+            self.AnalizarCPE(ret, archivo)
+        return True
+
 
     @inicializar_y_capturar_excepciones
     def DesvioCPEAutomotor(self, archivo="cpe.pdf"):
@@ -1197,6 +1217,23 @@ class WSCPE(BaseWS):
         if "nroOrden" in ret:
             self.NroOrden = ret["nroOrden"]
         return True
+
+    #@inicializar_y_capturar_excepciones
+   #  def ConsultarDomiciliosPorCUIT(self, cuit = None):
+    #    """Obitene el Domicilio por el número de Cuit."""
+    #    response = self.client.ConsultarDomiciliosPorCUIT(
+    #        auth={
+    #            "token": self.Token,
+    #            "sign": self.Sign,
+    #            "cuitRepresentada": self.Cuit,
+    #        },
+    #        solicitud={"cuit": cuit,},
+    #    )
+    #    ret = response.get("respuesta")
+    #    self.__analizar_errores(ret)
+    #    if "CUIT" in ret:
+    #        self.CUIT = ret["CUIT"]
+    #    return True
 
     @inicializar_y_capturar_excepciones
     def ConsultarProvincias(self, sep="||"):
@@ -1801,6 +1838,13 @@ if __name__ == "__main__":
         wscpe.AgregarCabecera(tipo_cpe=74, sucursal=1, nro_orden=1)
         wscpe.AgregarTransporte(fecha_hora_partida=datetime.datetime.now(), km_recorrer=333, codigo_turno="00")
         wscpe.RegresoOrigenCPEAutomotor()
+    
+    if "--regreso_origen_cpe_automotor_dg" in sys.argv:
+        wscpe.ActualizarCPE()
+        wscpe.AgregarCabecera(tipo_cpe=74, sucursal=1, nro_orden=1)
+        wscpe.AgregarTransporte(fecha_hora_partida=datetime.datetime.now(), km_recorrer=333,)
+        wscpe.AgregarDestino(domicilio_destino_tipo= 1, domicilio_destino_orden=2)
+        wscpe.RegresoOrigenCPEAutomotorDG()
 
     if "--desvio_cpe_automotor" in sys.argv:
         wscpe.AgregarCabecera(cuit_solicitante=CUIT, tipo_cpe=74, sucursal=1, nro_orden=1)
@@ -1813,10 +1857,8 @@ if __name__ == "__main__":
     if "--desvio_cpe_automotor_dg" in sys.argv:
         wscpe.ActualizarCPE()
         wscpe.AgregarCabecera(cuit_solicitante=CUIT, tipo_cpe=74, sucursal=1, nro_orden=1)
-        wscpe.AgregarDestino(
-            cuit_destino=20111111112, cod_provincia=1, cod_localidad=10216, planta=1, es_destino_campo=True  # newton
-        )
-        wscpe.AgregarTransporte(fecha_hora_partida=datetime.datetime.now(), km_recorrer=333, codigo_turno="00")
+        wscpe.AgregarDestino(cuit_destino=20111111112, planta=1, domicilio_destino_tipo= 1, domicilio_destino_orden= 1)
+        wscpe.AgregarTransporte(fecha_hora_partida=datetime.datetime.now(), km_recorrer=333)
         wscpe.DesvioCPEAutomotorDG()
 
     if "--consultar_cpe_por_destino" in sys.argv:
