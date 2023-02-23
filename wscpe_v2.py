@@ -171,7 +171,7 @@ class WSCPE(BaseWS):
         "ConsultarCPEDGPendienteActivacion",
         #"ConsultarDomiciliosPorCUIT",
         "ConsultarTiposEmbalaje",
-
+        "ConsultarUnidadesMedida",
         "SetParametros",
         "SetParametro",
         "GetParametro",
@@ -1405,6 +1405,22 @@ class WSCPE(BaseWS):
                 ("%s {granoPadre} %s {granoPadreDescripcion} %s {codigo} %s {descripcion} %s" % (sep, sep, sep, sep, sep)).format(**it)
                 if sep else it for it in array
             ]
+     
+    @inicializar_y_capturar_excepciones
+    def ConsultarUnidadesMedida(self, cuit_productor=None, sep="||"):
+        """Permite la consulta de unidad media."""
+        response = self.client.consultarUnidadesMedida(
+            auth={
+                "token": self.Token,
+                "sign": self.Sign,
+                "cuitRepresentada": self.Cuit,
+            },
+            solicitud={"cuit": cuit_productor},
+        )
+        ret = response.get("respuesta")
+        self.__analizar_errores(ret)
+        array = ret.get("unidadMedida", [])
+        return [("%s {codigo} %s {descripcion} %s" % (sep, sep, sep)).format(**it) if sep else it for it in array]
 
 
     @inicializar_y_capturar_excepciones
@@ -1955,6 +1971,11 @@ if __name__ == "__main__":
     if "--tipos_grano_embalaje" in sys.argv:
         ret = wscpe.ConsultarTiposEmbalaje()
         print("\n".join(ret))
+
+    if "--unidades_medida" in sys.argv:
+        ret = wscpe.ConsultarTiposEmbalaje()
+        print("\n".join(ret))
+
 
     if "--localidades_productor" in sys.argv:
         ret = wscpe.ConsultarLocalidadesProductor(cuit_productor=CUIT)
