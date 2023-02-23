@@ -165,6 +165,7 @@ class WSCPE(BaseWS):
         "RechazarEmisionDG",
         "ConfirmacionDefinitivaCPEAutomotorDG",
         "DesvioCPEAutomotorDG",
+        "NuevoDestinoDestinatarioCPEAutomotorDG"
 
         "SetParametros",
         "SetParametro",
@@ -1036,7 +1037,24 @@ class WSCPE(BaseWS):
         if "cabecera" in ret:
             self.AnalizarCPE(ret, archivo)
         return True
-
+   
+    @inicializar_y_capturar_excepciones
+    def NuevoDestinoDestinatarioCPEAutomotorDG(self, archivo="cpe.pdf"):
+        """Informar el nuevo destino o destinatario de una carta deporte existente."""
+        response = self.client.nuevoDestinoDestinatarioCPEAutomotorDG(
+            auth={
+                "token": self.Token,
+                "sign": self.Sign,
+                "cuitRepresentada": self.Cuit,
+            },
+            solicitud=self.cpe,
+        )
+        ret = response.get("respuesta")
+        self.__analizar_errores(ret)
+        if "cabecera" in ret:
+            self.AnalizarCPE(ret, archivo)
+        return True
+    
     @inicializar_y_capturar_excepciones
     def RegresoOrigenCPEAutomotor(self, archivo="cpe.pdf"):
         """Informar el regreso a origen de una carta de porte existente."""
@@ -1771,6 +1789,14 @@ if __name__ == "__main__":
         wscpe.AgregarTransporte(fecha_hora_partida=datetime.datetime.now(), km_recorrer=333, codigo_turno="00")
         wscpe.NuevoDestinoDestinatarioCPEAutomotor()
 
+    if "--nuevo_destino_destinatario_cpe_automotor_dg" in sys.argv:
+        wscpe.ActualizarCPE()
+        wscpe.AgregarCabecera(tipo_cpe=74, sucursal=1, nro_orden=1)
+        wscpe.AgregarDestino(cuit_destino=20111111112, planta=1, domicilio_destino_tipo= 1, domicilio_destino_orden= 1)
+        wscpe.AgregarTransporte(fecha_hora_partida=datetime.datetime.now(), km_recorrer=333, codigo_turno="00")
+        wscpe.NuevoDestinoDestinatarioCPEAutomotorDG()
+
+
     if "--regreso_origen_cpe_automotor" in sys.argv:
         wscpe.AgregarCabecera(tipo_cpe=74, sucursal=1, nro_orden=1)
         wscpe.AgregarTransporte(fecha_hora_partida=datetime.datetime.now(), km_recorrer=333, codigo_turno="00")
@@ -1783,6 +1809,15 @@ if __name__ == "__main__":
         )
         wscpe.AgregarTransporte(fecha_hora_partida=datetime.datetime.now(), km_recorrer=333, codigo_turno="00")
         wscpe.DesvioCPEAutomotor()
+
+    if "--desvio_cpe_automotor_dg" in sys.argv:
+        wscpe.ActualizarCPE()
+        wscpe.AgregarCabecera(cuit_solicitante=CUIT, tipo_cpe=74, sucursal=1, nro_orden=1)
+        wscpe.AgregarDestino(
+            cuit_destino=20111111112, cod_provincia=1, cod_localidad=10216, planta=1, es_destino_campo=True  # newton
+        )
+        wscpe.AgregarTransporte(fecha_hora_partida=datetime.datetime.now(), km_recorrer=333, codigo_turno="00")
+        wscpe.DesvioCPEAutomotorDG()
 
     if "--consultar_cpe_por_destino" in sys.argv:
         today = datetime.datetime.now().date()
