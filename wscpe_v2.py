@@ -1377,6 +1377,35 @@ class WSCPE(BaseWS):
             ]
 
     @inicializar_y_capturar_excepciones
+    def ConsultarPlantasDG(self, cuit, sep="||"):
+        """Permite la consulta de plantas activas"""
+        response = self.client.consultarPlantasDG(
+            auth={
+                "token": self.Token,
+                "sign": self.Sign,
+                "cuitRepresentada": self.Cuit,
+            },
+            solicitud={"cuit": cuit},
+        )
+        ret = response.get("respuesta")
+        self.__analizar_errores(ret)
+        if "planta" in ret:
+            # agrego titulos para respuesta
+            array = [
+                {
+                    "nroPlanta": "Nro Planta",
+                    "actividad": "Actividad",
+                    "conPlantaDG": "Con Planta",
+                    "sinPlantaDG": "Sin Planta",
+                }
+            ]
+            array.extend(ret.get("planta", []))
+            return [
+                sep.join((str(it["nroPlanta"]), str(it["actividad"]), it.get("conPlantaDG") or "", it.get("sinPlantaDG") or ""))
+                if sep else it for it in array
+            ]
+
+    @inicializar_y_capturar_excepciones
     def ConsultarDerivadosGranarios(self, cuit, sep="||"):
         """Permite la consulta de plantas activas"""
         response = self.client.consultarDerivadosGranarios(
@@ -1980,6 +2009,11 @@ if __name__ == "__main__":
 
     if "--plantas" in sys.argv:
         ret = wscpe.ConsultarPlantas(cuit=CUIT)
+        if ret:
+            print("\n".join(ret))
+    
+    if "--plantas_dg" in sys.argv:
+        ret = wscpe.ConsultarPlantasDG(cuit=CUIT)
         if ret:
             print("\n".join(ret))
 
