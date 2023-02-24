@@ -1486,12 +1486,9 @@ if __name__ == "__main__":
         ok = wscpe.CrearCPE()
         ok = wscpe.AgregarCabecera(
             tipo_cpe=74,
-            cuit_solicitante=CUIT,
             sucursal=221,
             nro_orden=nro_orden,
-            planta=None,
-            carta_porte=None,
-            nro_ctg=None,
+
             observaciones="Notas del transporte",
             
             #tipo_cpe=74,
@@ -1501,10 +1498,10 @@ if __name__ == "__main__":
             #observaciones="Notas del transporte"
         )
         ok = wscpe.AgregarOrigen(
-            es_usuario_industrial=None,
-            cuit_titular_planta=None,
-            domicilio_origen_tipo=None,
-            domicilio_origen_orden=None,
+            es_usuario_industrial=True,
+            cuit_titular_planta=20200000006,
+            domicilio_origen_tipo=2,
+            domicilio_origen_orden=1,
             planta=1,
             
             #planta=1,
@@ -1515,8 +1512,8 @@ if __name__ == "__main__":
         )
         ok = wscpe.AgregarDestino(
             cuit_destino=CUIT,
-            domicilio_destino_tipo=None,
-            domicilio_destino_orden=None,
+            domicilio_destino_tipo=1,
+            domicilio_destino_orden=2,
             planta=1938,
             cuit_destinatario=CUIT,
 
@@ -1539,10 +1536,10 @@ if __name__ == "__main__":
             #es_solicitante_campo=True,  # chequear dice booleano
         )
         ok = wscpe.AgregarIntervinientes(
-            cuit_reminitente_comercial=None,
+            cuit_reminitente_comercial=20111111112,
             cuit_mercado_a_termino=20222222223,
-            cuit_comisionista=None,
-            cuit_corredor=None,
+            cuit_comisionista=20222222223,
+            cuit_corredor=20400000000,
 
             # cuit_mercado_a_termino=20222222223,
             # cuit_corredor_venta_primaria=20200000006,
@@ -1555,12 +1552,12 @@ if __name__ == "__main__":
         )
         ok = wscpe.AgregarDatosCarga(
             cod_grano=23, 
-            cod_derivado_granario=None, 
+            cod_derivado_granario=136, 
             peso_bruto=110, 
             peso_tara=10, 
-            tipo_embalaje=None, 
+            tipo_embalaje=1,  # a granel 
             otro_embalaje=None, 
-            unidad_media=None, 
+            unidad_media=1, #kg
             cantidad_unidades=None,
             kg_litro_m3=None, 
             lote=None, 
@@ -1573,10 +1570,6 @@ if __name__ == "__main__":
         )
         ok = wscpe.AgregarTransporte(
             cuit_transportista=20120372913,
-            cuit_transportista_tramo2=None,
-            nro_vagon=None,
-            nro_precinto=None,
-            nro_operativo=None,
             dominio="AB001ST",  # 1 or more repetitions
             fecha_hora_partida=datetime.datetime.now() + datetime.timedelta(days=1),
             km_recorrer=500,
@@ -1586,9 +1579,6 @@ if __name__ == "__main__":
             cuit_pagador_flete=20333333334,
             mercaderia_fumigada=True,
             cuit_intermediario_flete=20333333334,
-            codigo_ramal=None,
-            descripcion_ramal=None,
-            tarifa_referencia=None,
             
             #cuit_transportista=20120372913,
             #fecha_hora_partida=datetime.datetime.now() + datetime.timedelta(days=1),
