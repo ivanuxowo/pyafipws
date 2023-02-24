@@ -909,43 +909,35 @@ class WSCPE(BaseWS):
         return True
 
     @inicializar_y_capturar_excepciones
-    def EditarCPEAutomotor(
+    def EditarCPEConfirmadaAutomotor(
         self,
         nro_ctg=None,
         cuit_corredor_venta_primaria=None,
         cuit_corredor_venta_secundaria=None,
         cuit_remitente_comercial_venta_primaria=None,
         cuit_remitente_comercial_venta_secundaria=None,
-        cuit_remitente_comercial_venta_secundaria2=None,
-        cuit_chofer=None,
-        cuit_transportista=None,
-        peso_bruto=None,
-        cod_grano=None,
-        dominio=None,
+        cuit_remitente_comercial_productor=None,
         archivo="cpe.pdf",
         **kwargs
     ):
         """Modificar datos de una CP Automotor en estado Activo."""
-        self.cpe.update({
+        solicitud = {
             "nroCTG": nro_ctg,
-            "cuitCorredorVentaPrimaria": cuit_corredor_venta_primaria,
-            "cuitCorredorVentaSecundaria": cuit_corredor_venta_secundaria,
-            "cuitRemitenteComercialVentaPrimaria": cuit_remitente_comercial_venta_primaria,
-            "cuitRemitenteComercialVentaSecundaria": cuit_remitente_comercial_venta_secundaria,
-            "cuitRemitenteComercialVentaSecundaria2": cuit_remitente_comercial_venta_secundaria2,
-            "cuitChofer": cuit_chofer,
-            "cuitTransportista": cuit_transportista,
-            "pesoBruto": peso_bruto,
-            "codGrano": cod_grano,
-            "dominio": dominio,
-        })
-        response = self.client.editarCPEAutomotor(
+            'intervinientes' : {
+                "cuitCorredorVentaPrimaria": cuit_corredor_venta_primaria,
+                "cuitCorredorVentaSecundaria": cuit_corredor_venta_secundaria,
+                "cuitRemitenteComercialVentaPrimaria": cuit_remitente_comercial_venta_primaria,
+                "cuitRemitenteComercialVentaSecundaria": cuit_remitente_comercial_venta_secundaria,
+                "cuitRemitenteComercialProductor": cuit_remitente_comercial_productor,
+            }
+        }
+        response = self.client.editarCPEConfirmadaAutomotor(
             auth={
                 "token": self.Token,
                 "sign": self.Sign,
                 "cuitRepresentada": self.Cuit,
             },
-            solicitud=self.cpe,
+            solicitud=solicitud,
         )
         ret = response.get("respuesta")
         if ret:
@@ -1867,6 +1859,16 @@ if __name__ == "__main__":
             peso_bruto=1000,
             cod_grano=31,
             dominio=["AA001ST"],
+        )
+
+    if "--editar_cpe_confirmada_automotor" in sys.argv:
+        wscpe.EditarCPEConfirmadaAutomotor(
+            nro_ctg=10100000542,
+            cuit_corredor_venta_primaria=20222222223,
+            cuit_corredor_venta_secundaria=20222222223,
+            cuit_remitente_comercial_venta_primaria=20222222223,
+            cuit_remitente_comercial_venta_secundaria=20222222223,
+            cuit_remitente_comercial_productor=20120372913,
         )
 
     if "--consultar_cpe_automotor_dg" in sys.argv:
