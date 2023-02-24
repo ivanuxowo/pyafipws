@@ -1488,8 +1488,6 @@ if __name__ == "__main__":
             tipo_cpe=74,
             sucursal=221,
             nro_orden=nro_orden,
-
-            observaciones="Notas del transporte",
             
             #tipo_cpe=74,
             #cuit_solicitante=CUIT,
