@@ -39,7 +39,7 @@ Sub Main()
     WSCPE.Cuit = "20267565393"
     
     ' Conectar al Servicio Web
-    wrapper = "pycurl"
+    wrapper = ""
     ok = WSCPE.Conectar("", "https://fwshomo.afip.gov.ar/wscpe/services/soap?wsdl", proxy, wrapper) ' homologación
     ' produccion: https://serviciosjava.afip.gob.ar/cpe-ws/services/wscpe?wsdl
     
@@ -48,6 +48,7 @@ Sub Main()
     Debug.Print "DbServerStatus", WSCPE.DbServerStatus
     Debug.Print "AuthServerStatus", WSCPE.AuthServerStatus
     
+    ok = WSCPE.CrearCPE()
     tipo_cpe = 74
     cuit_solicitante = 20111111112#
     sucursal = 1
