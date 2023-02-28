@@ -36,7 +36,7 @@ Sub Main()
     WSCPE.Sign = WSAA.Sign
     
     ' CUIT (debe estar registrado en la AFIP)
-    WSCPE.Cuit = "20267565393"
+    WSCPE.CUIT = "20267565393"
     
     ' Conectar al Servicio Web
     wrapper = ""
@@ -50,64 +50,77 @@ Sub Main()
     
     ok = WSCPE.CrearCPE()
     tipo_cpe = 74
-    cuit_solicitante = 20111111112#
+    cuit_solicitante = "20111111112"
     sucursal = 1
     nro_orden = 1
-    ok = WSCPE.AgregarCabecera(tipo_cpe, cuit_solicitante, sucursal, nro_orden)
-    
     planta = 1
-    cod_provincia_operador = 12
-    cod_localidad_operador = 5544
-    cod_provincia_productor = 12
-    cod_localidad_productor = 5544
-    ok = WSCPE.AgregarOrigen(planta, cod_provincia_operador, cod_localidad_operador, cod_provincia_productor, cod_localidad_productor)
+    carta_porte = 1
+    nro_ctg = 10100000542#
+    observaciones = "Notas del transporte"
+    ok = WSCPE.AgregarCabecera(tipo_cpe, cuit_solicitante, sucursal, nro_orden, planta, carta_porte, nro_ctg, observaciones)
     
+    es_usuario_industrial = True
+    cuit_titular_planta = "20200000006"
+    domicilio_origen_tipo = 2
+    domicilio_origen_orden = 1
     planta = 1
-    cod_provincia = 12
-    es_destino_campo = True
-    cod_localidad = 3058
-    cuit_destino = 20111111112#
-    cuit_destinatario = 30000000006#
-    ok = WSCPE.AgregarDestino(planta, cod_provincia, es_destino_campo, cod_localidad, cuit_destino, cuit_destinatario)
+    ok = WSCPE.AgregarOrigen(es_usuario_industrial, cuit_titular_planta, domicilio_origen_tipo, domicilio_origen_orden, planta)
     
-    certificado_coe = 330100025869#
-    cuit_remitente_comercial_productor = 20111111112#
+    cuit_destino = "20111111112"
+    domicilio_destino_tipo = 1
+    domicilio_destino_orden = 2
+    planta = 1938
+    cuit_destinatario = CUIT
+    ok = WSCPE.AgregarDestino(cuit_destino, domicilio_destino_tipo, domicilio_destino_orden, planta, cuit_destinatario)
+    
     corresponde_retiro_productor = True
     es_solicitante_campo = True
-    ok = WSCPE.AgregarRetiroProductor(certificado_coe, cuit_remitente_comercial_productor, corresponde_retiro_productor, es_solicitante_campo)
+    certificado_coe = "330100025869"
+    cuit_remitente_comercial_productor = "20111111112"
+    ok = WSCPE.AgregarRetiroProductor(corresponde_retiro_productor, es_solicitante_campo, certificado_coe, cuit_remitente_comercial_productor)
         
-    cuit_mercado_a_termino = 20222222223#
-    cuit_corredor_venta_primaria = 20222222223#
-    cuit_corredor_venta_secundaria = 20222222223#
-    cuit_remitente_comercial_venta_secundaria = 20222222223#
-    cuit_intermediario = 20222222223#
-    cuit_remitente_comercial_venta_primaria = 20222222223#
-    cuit_representante_entregador = 20222222223#
-    cuit_representante_recibidor = 20222222223#
-    ok = WSCPE.AgregarIntervinientes(cuit_mercado_a_termino, cuit_corredor_venta_primaria, cuit_corredor_venta_secundaria, cuit_remitente_comercial_venta_secundaria, cuit_intermediario, cuit_remitente_comercial_venta_primaria, cuit_representante_entregador, cuit_representante_recibidor)
+    cuit_reminitente_comercial = "20111111112"
+    cuit_mercado_a_termino = "20222222223"
+    cuit_comisionista = "20222222223"
+    cuit_corredor = "20400000000"
+    ok = WSCPE.AgregarIntervinientes(cuit_reminitente_comercial, cuit_mercado_a_termino, cuit_comisionista, cuit_corredor)
     
-    peso_tara = 1000
-    cod_grano = 31
-    peso_bruto = 1000
-    cosecha = 910
-    ok = WSCPE.AgregarDatosCarga(peso_tara, cod_grano, peso_bruto, cosecha)
+    cod_grano = 23
+    cod_derivado_granario = 136
+    peso_bruto = 110
+    peso_tara = 10
+    tipo_embalaje = 1
+    otro_embalaje = vbNull
+    unidad_media = 1
+    cantidad_unidades = vbNull
+    kg_litro_m3 = vbNull
+    lote = vbNull
+    fecha_lote = vbNull
+    ok = WSCPE.AgregarDatosCarga(cod_grano, cod_derivado_granario, peso_bruto, peso_tara, tipo_embalaje, otro_embalaje, unidad_media, cantidad_unidades, kg_litro_m3, lote, fecha_lote)
     
-    cuit_transportista = 20333333334#
+    cuit_transportista = "20333333334"
+    cuit_transportista_tramo2 = "20222222223"
+    nro_vagon = 55555556
+    nro_precinto = 1
+    nro_operativo = "1111111111"
+    dominio = "AB001ST"
     fecha_hora_partida = "2021-08-21T23:29:26.579557"
-    codigo_turno = "00"
-    dominio = "ZZZ000"
     km_recorrer = 500
-    cuit_chofer = 20333333334#
+    codigo_turno = "00"
+    cuit_chofer = "20333333334"
     tarifa = 100.1
-    cuit_pagador_flete = 20333333334#
-    cuit_intermediario_flete = 20333333334#
+    cuit_pagador_flete = "20333333334"
     mercaderia_fumigada = True
-    ok = WSCPE.AgregarTransporte(cuit_transportista, fecha_hora_partida, codigo_turno, dominio, km_recorrer, cuit_chofer, tarifa, cuit_pagador_flete, cuit_intermediario_flete, mercaderia_fumigada)
+    cuit_intermediario_flete = "20333333334"
+    codigo_ramal = False
+    descripcion_ramal = "XXXXX"
+    tarifa_referencia = vbNull
+    ok = WSCPE.AgregarTransporte(cuit_transportista, cuit_transportista_tramo2, nro_vagon, nro_precinto, nro_operativo, dominio, fecha_hora_partida, km_recorrer, codigo_turno, cuit_chofer, tarifa, cuit_pagador_flete, mercaderia_fumigada, cuit_intermediario_flete, codigo_ramal, descripcion_ramal, tarifa_referencia)
     
-    ok = WSCPE.LoadTestXML(App.Path & "\autorizar.xml")
+    ' ok = WSCPE.LoadTestXML(App.Path & "\autorizar.xml")
     
     archivo = App.Path & "\cpe.pdf"
-    ok = WSCPE.AutorizarCPEAutomotor(archivo)
+    ok = WSCPE.AutorizarCPEAutomotorDG(archivo)
     Debug.Print "Numero de CTG:", WSCPE.NroCTG
     Debug.Print "Fecha de emision:", WSCPE.FechaEmision
     Debug.Print "Estado:", WSCPE.Estado
@@ -128,9 +141,6 @@ Sub Main()
     MsgBox "CTG: " & WSCPE.NroCTG, vbInformation, "AutorizarCTE:"
     
     ' Consulto los CTG generados (genera planilla Excel por AFIP)
-    
-    Dim nro_ctg As Variant
-    nro_ctg = 10100000542#
     
     ok = WSCPE.LoadTestXML(App.Path & "\consultar.xml")
     If nro_ctg <> 0 Then
