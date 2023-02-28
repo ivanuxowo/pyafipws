@@ -30,7 +30,7 @@ Sub Main()
     Debug.Print "Sign:", WSAA.Sign
     
     ' Crear objeto interface Web Service de CTG
-    Set WSCPE = CreateObject("WSCPE")
+    Set WSCPE = CreateObject("WSCPEv2")
     ' Setear tocken y sing de autorización (pasos previos)
     WSCPE.Token = WSAA.Token
     WSCPE.Sign = WSAA.Sign
