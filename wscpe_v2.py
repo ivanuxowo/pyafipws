@@ -32,13 +32,13 @@ if 'xrange' not in dir(__builtins__):
 __author__ = "Mariano Reingart <reingart@gmail.com>"
 __copyright__ = "Copyright (C) 2021- Mariano Reingart"
 __license__ = "LGPL 3.0"
-__version__ = "1.06c"
+__version__ = "2.00a"
 
 LICENCIA = """
-wscpe.py: Interfaz para generar Carta de Porte Electrónica AFIP v1.5.0
-Resolución General 5017/2021
-Copyright (C) 2021 Mariano Reingart reingart@gmail.com
-http://www.sistemasagiles.com.ar/trac/wiki/CartadePorte
+wscpe_v2.py: Interfaz para generar Carta de Porte Electrónica AFIP v2.0
+Resolución General 5235/2022 - Derivados Granarios
+Copyright (C) 2023 Mariano Reingart reingart@gmail.com
+https://www.sistemasagiles.com.ar/trac/wiki/CartadePorteDerivadosGranarios
 
 Este progarma es software libre, se entrega ABSOLUTAMENTE SIN GARANTIA
 y es bienvenido a redistribuirlo bajo la licencia GPLv3.
@@ -48,12 +48,19 @@ e incorporación/distribución en programas propietarios ver PyAfipWs:
 http://www.sistemasagiles.com.ar/trac/wiki/PyAfipWs
 """
 
-AYUDA = """  # grey
+AYUDA = """
 Opciones: 
   --ayuda: este mensaje
 
   --debug: modo depuración (detalla y confirma las operaciones)
-  --prueba: genera y autoriza una rec de prueba (no usar en producción!)
+  --autorizar_cpe_automotor_dg: genera y autoriza una cpe de prueba (no usar en producción!)
+  --aceptar_emision_dg
+  --rechazar_emision_dg
+  --confirmacion_definitiva_cpe_automotor_dg
+  --nuevo_destino_destinatario_cpe_automotor_dg
+  --regreso_origen_cpe_automotor_dg
+  --desvio_cpe_automotor_dg
+  --derivados_granarios: listar tabla de parametros
   --dummy: consulta estado de servidores
 
 Ver wscpe.ini para parámetros de configuración (URL, certificados, etc.)"
@@ -121,7 +128,7 @@ class WSCPE(BaseWS):
         "Dummy",
         "SetTicketAcceso",
         "DebugLog",
-        "CrearCPE",
+        "CrearCPE", "ActualizarCPE",
         "AgregarCabecera",
         "AgregarOrigen",
         "AgregarRetiroProductor",
@@ -210,8 +217,8 @@ class WSCPE(BaseWS):
         "Evento",
         "Eventos",
     ]
-    _reg_progid_ = "WSCPE"
-    _reg_clsid_ = "{37F6A7B5-344E-45C5-9198-0CF7B206F409}"
+    _reg_progid_ = "WSCPEv2"
+    _reg_clsid_ = "{C6D689A4-C33E-4CC8-96FF-7F262B01F07F}"
 
     # Variables globales para BaseWS:
     HOMO = HOMO
@@ -1400,7 +1407,7 @@ class WSCPE(BaseWS):
      
     @inicializar_y_capturar_excepciones
     def ConsultarUnidadesMedida(self, cuit_productor=None, sep="||"):
-        """Permite la consulta de unidad media."""
+        """Permite la consulta de unidades medida."""
         response = self.client.consultarUnidadesMedida(
             auth={
                 "token": self.Token,
@@ -1442,7 +1449,7 @@ if __name__ == "__main__":
     # obteniendo el TA
     from pyafipws.wsaa import WSAA
 
-    wsaa_url = ""
+    wsaa_url = "https://wsaahomo.afip.gov.ar/ws/services/LoginCms?wsdl"
     wscpe_url = WSDL[True]
 
     CERT = os.getenv("CERT", "reingart.crt")
@@ -1473,7 +1480,7 @@ if __name__ == "__main__":
         print("AuthServerStatus", wscpe.AuthServerStatus)
         sys.exit(0)
 
-    if "--autorizar_cpe_automotor" in sys.argv:
+    if "--autorizar_cpe_automotor_dg" in sys.argv:
         ok = wscpe.ConsultarUltNroOrden(sucursal=221, tipo_cpe=74)
         nro_orden = wscpe.NroOrden + 1
         ok = wscpe.CrearCPE()
