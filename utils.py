@@ -39,7 +39,7 @@ import stat
 import time
 import traceback
 import warnings
-from io import StringIO
+from io import StringIO, BytesIO
 from decimal import Decimal
 from urllib.parse import urlencode
 from urllib.parse import urlparse
@@ -90,7 +90,7 @@ try:
     import platform
 
     monkey_patch = sys.version_info < (3, ) or httplib2._build_ssl_context.__module__ != "httplib2"
-    needs_patch = platform.system() == 'Linux' or sys.version_info > (3, 10)
+    needs_patch = platform.system() in ["Linux", "Darwin"] or sys.version_info > (3, 10)
     if needs_patch and not monkey_patch:
         _build_ssl_context = httplib2._build_ssl_context
 
@@ -546,9 +546,16 @@ class WebClient(object):
     def multipart_encode(self, vars):
         "Enconde form data (vars dict)"
         boundary = choose_boundary()
-        buf = StringIO()
+        if sys.version_info[0] < 3:
+            buf = BytesIO()
+            def _is_string(val):
+                return (not isinstance(val, file))
+        else:
+            buf = StringIO()
+            def _is_string(val):
+                return isinstance(val, str)
         for key, value in list(vars.items()):
-            if not isinstance(value, file):
+            if _is_string(value):
                 buf.write("--%s\r\n" % boundary)
                 buf.write('Content-Disposition: form-data; name="%s"' % key)
                 buf.write("\r\n\r\n" + value + "\r\n")
@@ -576,8 +583,6 @@ class WebClient(object):
         "Perform a GET/POST request and return the response"
 
         location = self.location
-        if isinstance(location, str):
-            location = location.encode("utf8")
         # extend the base URI with additional components
         if args:
             location += "/".join(args)

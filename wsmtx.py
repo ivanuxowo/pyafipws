@@ -20,9 +20,9 @@ from __future__ import absolute_import
 from builtins import str
 
 __author__ = "Mariano Reingart <reingart@gmail.com>"
-__copyright__ = "Copyright (C) 2010-2021 Mariano Reingart"
+__copyright__ = "Copyright (C) 2010-2023 Mariano Reingart"
 __license__ = "LGPL-3.0-or-later"
-__version__ = "3.15d"
+__version__ = "3.16b"
 
 import datetime
 import decimal
@@ -47,6 +47,7 @@ class WSMTXCA(BaseWS):
         "EstablecerCampoItem",
         "AgregarOpcional",
         "AgregarPeriodoComprobantesAsociados",
+        "AgregarActividad",
         "AutorizarComprobante",
         "CAESolicitar",
         "AutorizarAjusteIVA",
@@ -67,6 +68,7 @@ class WSMTXCA(BaseWS):
         "ConsultarCondicionesIVA",
         "ConsultarMonedas",
         "ConsultarUnidadesMedida",
+        "ConsultarActividadesVigentes",
         "ConsultarTiposTributo",
         "ConsultarTiposDatosAdicionales",
         "ConsultarCotizacionMoneda",
@@ -223,6 +225,7 @@ class WSMTXCA(BaseWS):
             "iva": [],
             "detalles": [],
             "opcionales": [],
+            "actividades": [],
         }
         if fecha_serv_desde:
             fact["fecha_serv_desde"] = fecha_serv_desde
@@ -359,6 +362,12 @@ class WSMTXCA(BaseWS):
         self.factura["opcionales"].append(op)
         return True
 
+    def AgregarActividad(self, actividad_id=0, **kwarg):
+        "Agrego actividades a una factura (interna)"
+        act = {"actividad_id": actividad_id}
+        self.factura["actividades"].append(act)
+        return True
+
     @inicializar_y_capturar_excepciones
     def AutorizarComprobante(self):
         f = self.factura
@@ -466,6 +475,16 @@ class WSMTXCA(BaseWS):
                     }
                 }
                 for dato in f["opcionales"]
+            ]
+            or None,
+            "arrayActividades": f["actividades"]
+            and [
+                {
+                    "actividad": {
+                        "codigo": act["actividad_id"],
+                    }
+                }
+                for act in f["actividades"]
             ]
             or None,
         }
@@ -873,6 +892,16 @@ class WSMTXCA(BaseWS):
                     }
                 }
                 for dato in f["opcionales"]
+            ]
+            or None,
+            "arrayActividades": f["actividades"]
+            and [
+                {
+                    "actividad": {
+                        "codigo": act["actividad_id"],
+                    }
+                }
+                for act in f["actividades"]
             ]
             or None,
         }
@@ -1436,6 +1465,21 @@ class WSMTXCA(BaseWS):
             for p in ret["arrayPuntosVenta"]
         ]
 
+    @inicializar_y_capturar_excepciones
+    def ConsultarActividadesVigentes(self):
+        "Este método permite consultar las actividades vigentes para el contribuyente"
+        ret = self.client.consultarActividadesVigentes(
+            authRequest={
+                "token": self.Token,
+                "sign": self.Sign,
+                "cuitRepresentada": self.Cuit,
+            },
+        )
+        return [
+            "%(codigo)s: %(orden)s %(descripcion)s" % p["actividad"]
+            for p in ret["arrayActividades"]
+        ]
+
 
 def main():
     "Función principal de pruebas (obtener CAE)"
@@ -1583,6 +1627,9 @@ def main():
 
             if "--rg4540" in sys.argv:
                 wsmtxca.AgregarPeriodoComprobantesAsociados("2020-01-01", "2020-01-31")
+
+            if "--rg5259" in sys.argv:
+                wsmtxca.AgregarActividad(960990)
 
             print(wsmtxca.factura)
 
@@ -1740,6 +1787,8 @@ def main():
         print(wsmtxca.ConsultarUnidadesMedida())
         print(wsmtxca.ConsultarTiposTributo())
         print(wsmtxca.ConsultarTiposDatosAdicionales())
+        if "--rg5259" in sys.argv:
+            print("\n".join(wsmtxca.ConsultarActividadesVigentes()))
 
     if "--puntosventa" in sys.argv:
         print(wsmtxca.ConsultarPuntosVentaCAE())
