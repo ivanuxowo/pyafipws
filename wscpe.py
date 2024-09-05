@@ -32,7 +32,7 @@ if 'xrange' not in dir(__builtins__):
 __author__ = "Mariano Reingart <reingart@gmail.com>"
 __copyright__ = "Copyright (C) 2021- Mariano Reingart"
 __license__ = "LGPL 3.0"
-__version__ = "1.06c"
+__version__ = "1.07b"
 
 LICENCIA = """
 wscpe.py: Interfaz para generar Carta de Porte Electrónica AFIP v1.5.0
@@ -686,6 +686,10 @@ class WSCPE(BaseWS):
         peso_bruto=None,
         cod_grano=None,
         archivo="cpe.pdf",
+        dominio=None,
+        tarifa=None,
+        km_recorrer=None,
+        observaciones=None,
         **kwargs
     ):
         """Modificar datos de una CP Ferroviaria en estado Activo."""
@@ -699,6 +703,8 @@ class WSCPE(BaseWS):
             "cuitTransportista": cuit_transportista,
             "pesoBruto": peso_bruto,
             "codGrano": cod_grano,
+            "dominio": dominio,
+            "kmRecorrer": km_recorrer,
         })
         response = self.client.editarCPEFerroviaria(
             auth={
